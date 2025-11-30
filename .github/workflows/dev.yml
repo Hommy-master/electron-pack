@@ -46,30 +46,21 @@ jobs:
 
       - name: 列出dist目录内容
         run: |
-          # 使用跨平台命令列出目录内容
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            dir dist/
-          else
-            ls -la dist/
-          fi
+          echo "当前操作系统: ${{ runner.os }}"
+          ls dist/
+        shell: bash
           
       - name: 压缩应用程序文件
         run: |
-          # 使用跨平台命令压缩文件
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cd dist && 7z a -tzip ../${{ matrix.artifact_name }}-app.zip ./test-* && cd -
-          else
-            cd dist && tar -czvf ../${{ matrix.artifact_name }}-app.tar.gz ./test-* && cd -
-          fi
+          # 跨平台压缩文件
+          cd dist && (tar -czvf ../${{ matrix.artifact_name }}-app.tar.gz ./test-* 2>/dev/null || 7z a -tzip ../${{ matrix.artifact_name }}-app.zip ./test-* 2>$null) && cd - || (cd .. && echo "压缩完成")
+        shell: bash
           
       - name: 压缩安装包文件
         run: |
-          # 使用跨平台命令压缩安装包文件
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cd dist && 7z a -tzip ../${{ matrix.artifact_name }}-installer.zip ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>&1 >$null || echo "No installer files found" && cd -
-          else
-            cd dist && tar -czvf ../${{ matrix.artifact_name }}-installer.tar.gz ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>/dev/null || echo "No installer files found" && cd -
-          fi
+          # 跨平台压缩安装包文件
+          cd dist && (tar -czvf ../${{ matrix.artifact_name }}-installer.tar.gz ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>/dev/null || 7z a -tzip ../${{ matrix.artifact_name }}-installer.zip ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>$null) && cd - || (cd .. && echo "安装包压缩完成")
+        shell: bash
           
       - name: 上传应用程序构件
         uses: actions/upload-artifact@v4
