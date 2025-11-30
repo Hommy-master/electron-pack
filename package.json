@@ -10,7 +10,8 @@
     "dev": "electron .",
     "build-win": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon/logo.ico",
     "build-mac": "electron-packager . --platform=darwin --arch=x64 --out=dist --overwrite --icon=assets/icon/logo.icns",
-    "build-installer": "electron-builder --win nsis --x64 --config electron-builder.config.js --publish never"
+    "build-win-installer": "electron-builder --win nsis --x64 --config electron-builder.config.js --publish never",
+    "build-mac-installer": "electron-builder --mac --x64 --config electron-builder.config.js --publish never"
   },
   "devDependencies": {
     "electron": "31.7.6",

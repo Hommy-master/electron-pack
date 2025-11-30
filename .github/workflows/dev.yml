@@ -1,0 +1,58 @@
+name: Build
+
+on:
+  push:
+    branches: [ lufeixuecheng ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ lufeixuecheng ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          #- os: ubuntu-latest
+          #  platform: linux
+          #  artifact_name: linux-build
+          - os: windows-latest
+            platform: win
+            artifact_name: windows-build
+          - os: macos-latest
+            platform: mac
+            artifact_name: macos-build
+
+    steps:
+      - name: 准备代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # 使用 Node.js 22 LTS，你可以根据需求调整
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci         # 使用 ci 而不是 install，以获得更准确和更快的依赖安装
+      
+      - name: 根据平台打包
+        run: npm run build-${{ matrix.platform }} -- --publish=never
+
+      - name: 压缩文件
+        run: |
+          cd dist && tar -czvf ../${{ matrix.artifact_name }}.tar.gz ./* && cd -
+          ls 
+    
+      - name: 上传文件
+        # 仅当推送以 'v' 开头的标签时执行（例如 v1.0.0）
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: ${{ matrix.artifact_name }}.tar.gz
+          overwrite: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
