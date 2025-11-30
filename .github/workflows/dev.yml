@@ -46,28 +46,47 @@ jobs:
 
       - name: 列出dist目录内容
         run: |
-          ls -la dist/
+          # 使用跨平台命令列出目录内容
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            dir dist/
+          else
+            ls -la dist/
+          fi
           
       - name: 压缩应用程序文件
         run: |
-          cd dist && tar -czvf ../${{ matrix.artifact_name }}-app.tar.gz ./test-* && cd -
+          # 使用跨平台命令压缩文件
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            cd dist && 7z a -tzip ../${{ matrix.artifact_name }}-app.zip ./test-* && cd -
+          else
+            cd dist && tar -czvf ../${{ matrix.artifact_name }}-app.tar.gz ./test-* && cd -
+          fi
           
       - name: 压缩安装包文件
         run: |
-          cd dist && tar -czvf ../${{ matrix.artifact_name }}-installer.tar.gz ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>/dev/null || echo "No installer files found" && cd -
+          # 使用跨平台命令压缩安装包文件
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            cd dist && 7z a -tzip ../${{ matrix.artifact_name }}-installer.zip ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>&1 >$null || echo "No installer files found" && cd -
+          else
+            cd dist && tar -czvf ../${{ matrix.artifact_name }}-installer.tar.gz ./*.exe ./*.dmg ./*.blockmap ./latest.yml 2>/dev/null || echo "No installer files found" && cd -
+          fi
           
       - name: 上传应用程序构件
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-app
-          path: ${{ matrix.artifact_name }}-app.tar.gz
+          path: |
+            ${{ matrix.artifact_name }}-app.tar.gz
+            ${{ matrix.artifact_name }}-app.zip
           if-no-files-found: ignore
           
       - name: 上传安装包构件
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-installer
-          path: ${{ matrix.artifact_name }}-installer.tar.gz
+          path: |
+            ${{ matrix.artifact_name }}-installer.tar.gz
+            ${{ matrix.artifact_name }}-installer.zip
           if-no-files-found: ignore
 
       - name: 发布版本
@@ -78,7 +97,9 @@ jobs:
           name: Release ${{ github.ref_name }}
           files: |
             ${{ matrix.artifact_name }}-app.tar.gz
+            ${{ matrix.artifact_name }}-app.zip
             ${{ matrix.artifact_name }}-installer.tar.gz
+            ${{ matrix.artifact_name }}-installer.zip
           overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
