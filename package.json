@@ -1,0 +1,30 @@
+{
+  "name": "electron-test-app",
+  "version": "1.0.0",
+  "description": "A minimal Electron test application",
+  "main": "main.js",
+    "author": "Developer",
+    "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "pack": "electron-packager . --platform=win32 --arch=x64 --out=dist/packaged-new-with-icon --overwrite --icon=assets/icon/logo.ico"
+  },
+  "devDependencies": {
+    "electron": "31.7.6",
+    "@electron/packager": "^18.3.5"
+  },
+  "build": {
+    "appId": "com.example.electrontest",
+    "productName": "Electron Test App",
+    "directories": {
+      "output": "dist/packaged-new-with-icon"
+    },
+    "win": {
+      "icon": "assets/icon/logo.ico",
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
