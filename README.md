@@ -54,6 +54,25 @@ npm run pack
     └── icon/            # 图标文件目录
 ```
 
+## 注意事项
+- 在windows上打包经常受图标缓存影响，需要清理图标缓存再打包
+开管理员 PowerShell，复制粘贴执行：
+```powershell
+# 停掉 explorer
+taskkill /f /im explorer.exe
+
+# 删除图标/缩略图缓存（Win10/11 通用）
+Remove-Item "$env:LOCALAPPDATA\IconCache.db" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\iconcache*" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache*" -Force -ErrorAction SilentlyContinue
+
+# 可选：重建字体缓存（有时图标走字体）
+Remove-Item "$env:WINDIR\ServiceProfiles\LocalService\AppData\Local\FontCache*" -Force -ErrorAction SilentlyContinue
+
+# 重启 explorer
+start explorer
+```
+
 ## 许可证
 
 MIT
